@@ -1,0 +1,36 @@
+---
+
+# YUM security plugin package (explicit version can be specified here)
+errata_plugin_pkg: yum-plugin-security
+
+# Whether to clean YUM cache before searching for erratas
+errata_clean: yes
+
+# List of erratas to check
+# (set to 'all' to fix all erratas)
+errata_list: all
+
+# Whether to check for bugfixes advisories
+errata_bugfix: no
+
+# Whether to check for security advisories
+errata_security: no
+
+# List of security severities
+errata_security_severity:
+  - Critical
+  - Important
+  - Moderate
+  - Low
+
+# Whether to print the list of found erratas
+errata_print_found: no
+
+# Whether to print the list of matching erratas
+errata_print_match: no
+
+# Whether to fix the found erratas
+errata_fix: yes
+
+# Filter which produces the final list of found erratas
+errata_filter: "| grep -v 'not found' | sed 's/\ .*//' | sort | uniq"

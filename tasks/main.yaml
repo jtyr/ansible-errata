@@ -1,0 +1,64 @@
+---
+
+- name: Test distribution
+  assert:
+    that: >
+      ansible_os_family == "RedHat"
+  tags:
+    - errata_assert
+
+- name: Install YUM security plugin
+  package:
+    name: "{{ errata_plugin_pkg }}"
+  tags:
+    - errata_pkg
+
+- name: Clean YUM cache
+  shell: env yum clean all
+  when: errata_clean
+  tags:
+    - errata_clean
+
+- name: Get list of erratas
+  shell: >
+    env yum -q list-sec
+    {{ '--bugfixes' if errata_bugfix else '' }}
+    {{ '--security' if errata_security else '' }}
+    {{ '--sec-severity ' ~ errata_security_severity | join(',') if errata_security and errata_security_severity | length else '' }}
+    {{ errata_filter }}
+  register: errata_found_erratas
+  changed_when: false
+  tags:
+    - errata_list
+    - errata_print
+    - errata_print_found
+    - errata_print_match
+
+- name: Print found erratas
+  debug:
+    var: errata_found_erratas.stdout_lines
+  when: errata_print_found
+  tags:
+    - errata_print
+    - errata_print_found
+
+- name: Print matching erratas
+  debug:
+    var: errata_list | intersect(errata_found_erratas.stdout_lines)
+  when: >
+    errata_print_match and
+    errata_list is not string
+  tags:
+    - errata_print
+    - errata_print_match
+
+- name: Fix matching erratas
+  shell: env yum update-minimal -y --advisory {{ item }}
+  with_items: "{{
+    errata_found_erratas.stdout_lines
+      if errata_list is string and errata_list == 'all'
+      else
+    errata_list | intersect(errata_found_erratas.stdout_lines) }}"
+  when: errata_fix
+  tags:
+    - errata_fix
