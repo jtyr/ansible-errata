@@ -25,7 +25,7 @@
     {{ '--bugfixes' if errata_bugfix else '' }}
     {{ '--security' if errata_security else '' }}
     {{ '--sec-severity ' ~ errata_security_severity | join(',') if errata_security and errata_security_severity | length else '' }}
-    {{ errata_filter }}
+    {{ errata_filter }}; exit ${PIPESTATUS[0]}
   register: errata_found_erratas
   changed_when: false
   tags:
