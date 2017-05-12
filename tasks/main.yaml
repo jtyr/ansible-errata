@@ -15,7 +15,7 @@
 
 - name: Clean YUM cache
   shell: env yum clean all
-  when: errata_clean
+  when: errata_clean == true
   tags:
     - errata_clean
 
@@ -37,7 +37,7 @@
 - name: Print found erratas
   debug:
     var: errata_found_erratas.stdout_lines
-  when: errata_print_found
+  when: errata_print_found == true
   tags:
     - errata_print
     - errata_print_found
@@ -59,6 +59,6 @@
       if errata_list is string and errata_list == 'all'
       else
     errata_list | intersect(errata_found_erratas.stdout_lines) }}"
-  when: errata_fix
+  when: errata_fix == true
   tags:
     - errata_fix
